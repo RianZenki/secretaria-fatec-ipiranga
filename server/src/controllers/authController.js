@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
+
 const mailer = require('../modules/mailer')
 
 const db = require('../services/connection')
@@ -48,14 +49,21 @@ function login(req, res) {
   db.query(`SELECT * FROM aluno WHERE email = '${email}'`,
     (err, result) => {
       if (err)
-        res.status(400).send({ error: "Email ou senha inválidos" })
+        return res.status(400).json({ error: "Email ou senha inválidos" })
 
       if (result.length > 0) {
-        if (result[0].autenticado === "0")
-          return res.status(401).send({ error: "Usuário não atenticado. Favor olhe seu email" })
 
         const senhasIguais = bcrypt.compareSync(senha, result[0].senha)
 
+        // Verifica se a senha informada está incorreta
+        if (!senhasIguais)
+          return res.status(400).json({ error: "Email ou senha inválidos" })
+
+        // Verificar se o usuário está autenticado no banco
+        if (result[0].autenticado === "0")
+          return res.status(401).json({ error: "Usuário não autenticado. Verifique seu email!" })
+
+        // Verifica se a senha informada está correta
         if (senhasIguais) {
           const aluno = {
             idAluno: result[0].idAluno,
@@ -67,16 +75,17 @@ function login(req, res) {
             token: jwt.sign(aluno, process.env.TOKEN_SECRET)
           })
         }
+
         else
-          return res.status(400).send({ error: "Email ou senha inválidos" })
+          return res.status(400).json({ error: "Email ou senha inválidos" })
       }
       else
-        return res.status(400).send({ error: "Email ou senha inválidos" })
+        return res.status(400).json({ error: "Email ou senha inválidos" })
     })
 }
 
 function esqueciSenha(req, res) {
-  const email = req.body.email
+  const email = req.body.emailRec
 
   db.query(`SELECT * FROM aluno WHERE email = '${email}'`,
     (err, result) => {
@@ -89,14 +98,13 @@ function esqueciSenha(req, res) {
           to: 'rian.zenki@gmail.com',
           subject: 'Recuperar Senha',
           template: 'auth/esqueciSenha',
-          context: { token: result[0].token },
+          context: { token: result[0].token, id: result[0].idAluno },
         }, (err) => {
           if (err) {
-            console.log(err)
             return res.status(400).send({ error: "Erro ao enviar o email de recuperação de senha" })
           }
 
-          return res.status(200).send({ msg: "Email enviado" })
+          return res.status(200).send({ msg: "Email enviado para a criação da nova senha" })
         })
 
       }
@@ -105,32 +113,54 @@ function esqueciSenha(req, res) {
     })
 }
 
-function alterarSenha(req, res) {
-  const { email, token } = req.body
-  const senha = bcrypt.hashSync(req.body.senha)
+function verificarTokenSenha(req, res) {
+  const { id, token } = req.params
 
-  db.query(`SELECT * FROM aluno WHERE email = '${email}'`,
+  db.query(`SELECT * FROM aluno WHERE idAluno = '${id}' AND token = '${token}'`,
     (err, result) => {
       if (err)
-        res.status(400).send({ error: "Usuário não encontrado" })
+        return res.status(400).redirect('http://localhost:3000/')
 
       if (result.length > 0) {
-        if (token !== result[0].token)
-          return res.status(400).send({ error: "Token inválido" })
+        return res.status(200).redirect(`http://localhost:3000/nova-senha?t=${token}`)
+      }
+      else {
+        return res.status(400).redirect('http://localhost:3000/')
+      }
+    })
+}
 
+function alterarSenha(req, res) {
+  const { id, token } = req.session
+  const senha = bcrypt.hashSync(req.body.senha)
+
+  console.log(req.session.id)
+  db.query(`SELECT * FROM aluno WHERE idAluno = '${id}' AND token = '${token}'`,
+    (err, result) => {
+      if (err) {
+        // req.session.destroy()
+        res.status(400).send({ error: "Usuário não encontrado" })
+      }
+
+      if (result.length > 0) {
         db.query(`
           UPDATE aluno
           SET senha = '${senha}'
-          WHERE idAluno = '${result[0].idAluno}'
+          WHERE idAluno = '${id} AND token = '${token}'
         `, (err, result) => {
-          if (err)
+          if (err) {
+            // req.session.destroy()
             return res.status(400).send({ error: "Erro na alteração da senha" })
+          }
 
+          // req.session.destroy()
           return res.status(200).send({ msg: "Senha alterado com sucesso" })
         })
       }
-      else
+      else {
+        // req.session.destroy()
         return res.status(400).send({ error: "Usuário não encontrado" })
+      }
     })
 }
 
@@ -154,7 +184,7 @@ function autenticar(req, res) {
           if (err)
             return res.status(400).send({ error: "Erro na autenticação" })
 
-          return res.status(200).send({ msg: "Conta autenticada com sucesso" })
+          return res.status(200).redirect('http://localhost:3000/')
         })
       }
       else
@@ -163,4 +193,4 @@ function autenticar(req, res) {
   )
 }
 
-module.exports = { cadastro, login, esqueciSenha, alterarSenha, autenticar }
+module.exports = { cadastro, login, esqueciSenha, alterarSenha, verificarTokenSenha, autenticar }

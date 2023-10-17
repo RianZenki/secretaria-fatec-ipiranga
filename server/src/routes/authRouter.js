@@ -12,6 +12,9 @@ router.post('/login', authController.login)
 // Enviar token de recuperação de senha
 router.post('/esqueci-senha', authController.esqueciSenha)
 
+// Verificar token de alteração de senha
+router.get('/alterar-senha/:id/:token', authController.verificarTokenSenha)
+
 // Alterar senha utilizando um token
 router.post('/alterar-senha', authController.alterarSenha)
 

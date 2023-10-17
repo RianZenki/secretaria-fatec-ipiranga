@@ -1,0 +1,54 @@
+.input-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+}
+
+.input-group label {
+  font-size: 16;
+  margin-bottom: 5px;
+}
+
+.input-group .input-container {
+  display: flex;
+  align-items: center;
+  padding: 18px 16px;
+  gap: 16px;
+  background-color: #f5f5f5;
+  margin-top: 8px;
+  border-radius: 4px;
+  cursor: text;
+}
+
+.input-container:focus-within {
+  outline: solid 2px #1b5ed6;
+}
+
+.input-group .input {
+  width: 100%;
+  border: none;
+  background-color: #f5f5f5;
+  font-size: 16px;
+}
+
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus,
+.input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #f5f5f5 inset !important;
+}
+
+.input-group .input:focus {
+  border: none;
+  outline: none;
+}
+
+.form-error {
+  color: red;
+  margin-top: 5px;
+  font-size: 12px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}

@@ -1,16 +1,11 @@
-import { Route, Routes } from 'react-router-dom';
-
-import { Cadastro } from './pages/Cadastro'
-import { Login } from './pages/Login'
-import { Aluno } from './pages/Aluno'
+import { Rotas } from './routes/Rotas'
+import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
   return (
-      <Routes>
-        <Route path="/" element={<Cadastro />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/aluno" element={<Aluno />} />
-      </Routes>
+      <AuthProvider>
+          <Rotas />
+      </AuthProvider>
   );
 }
 
