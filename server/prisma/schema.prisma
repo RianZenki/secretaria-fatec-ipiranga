@@ -21,21 +21,23 @@ model Aluno {
   token        String        @unique
   autenticado  Boolean       @default(false)
   solicitacoes Solicitacao[]
+  Resposta     Resposta[]
 
   @@map("alunos")
 }
 
 model Solicitacao {
-  id            String    @id @default(uuid())
+  id            String     @id @default(uuid())
   tipo          String
   descricao     String
   status        String
-  criado_em     DateTime  @default(now())
+  criado_em     DateTime   @default(now())
   atualizado_em DateTime?
   encerrado_em  DateTime?
-  Aluno         Aluno?    @relation(fields: [alunoId], references: [id])
+  Aluno         Aluno?     @relation(fields: [alunoId], references: [id])
   alunoId       String?
   arquivo       Arquivo[]
+  Resposta      Resposta[]
 
   @@map("solicitacoes")
 }
@@ -45,18 +47,46 @@ model Arquivo {
   nome          String
   Solicitacao   Solicitacao? @relation(fields: [solicitacaoId], references: [id])
   solicitacaoId String?
+  Resposta      Resposta?    @relation(fields: [respostaId], references: [id])
+  respostaId    String?
 
   @@map("arquivos")
 }
 
-// model Resposta {
+model Resposta {
+  id            String      @id @default(uuid())
+  solicitacaoId String
+  solicitcao    Solicitacao @relation(fields: [solicitacaoId], references: [id])
+  remetente     String
+  descricao     String
+  arquivo       Arquivo[]
+  criado_em     DateTime    @default(now())
+  origem        String
+  aluno         Aluno?      @relation(fields: [alunoId], references: [id])
+  alunoId       String?
+  //secretario
+}
 
-// }
+model Departamento {
+  id                      String                    @id @default(uuid())
+  nome                    String
+  Departamento_secretario Departamento_secretario[]
+}
 
-// model Departamento {
+model Secretario {
+  id                      String                    @id @default(uuid())
+  numeroMatricula         String                    @unique
+  nome                    String
+  email                   String                    @unique
+  senha                   String
+  token                   String                    @unique
+  Departamento_secretario Departamento_secretario[]
+}
 
-// }
-
-// model Secretario {
-
-// }
+model Departamento_secretario {
+  id             String       @id @default(uuid())
+  departamento   Departamento @relation(fields: [departamentoId], references: [id])
+  secretario     Secretario   @relation(fields: [secretarioId], references: [id])
+  departamentoId String
+  secretarioId   String
+}
