@@ -1,13 +1,12 @@
-import { prismaClient } from "../database/prismaClient.js";
-
+import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jsonwebtoken from "jsonwebtoken";
 import { randomBytes } from "crypto";
 
+import { prismaClient } from "../database/prismaClient.js";
 import mailer from "../modules/mailer.js";
 
 import db from "../services/connection.js";
-import { Prisma } from "@prisma/client";
 
 const { hashSync, compareSync } = bcrypt;
 const { sign } = jsonwebtoken;
@@ -52,88 +51,66 @@ export async function cadastro(req, res) {
 		return res.status(500).send(error);
 	}
 
-	// db.query(
-	// 	`SELECT * FROM aluno WHERE email = '${email}'`,
-	// 	(err, result) => {
+	// mailer.sendMail(
+	// 	{
+	// 		from: "Rian Zenki <rian.nacazato@hotmail.com>",
+	// 		to: "rian.zenki@gmail.com",
+	// 		subject: "Autenticar conta",
+	// 		template: "auth/autenticar",
+	// 		context: { token },
+	// 	},
+	// 	(err) => {
 	// 		if (err)
-	// 			return res
-	// 				.status(400)
-	// 				.send({ error: "Erro na criação do cadastro" });
+	// 			return res.status(400).send({
+	// 				error: "Erro ao enviar o email de autenticação",
+	// 			});
 
-	// 		if (result.length === 0) {
-	// 			db.query(
-	// 				`INSERT INTO aluno (nome, email, curso, turno, ra, senha, token) VALUES ('${nome}', '${email}', '${curso}', '${turno}', '${ra}', '${senha}', '${token}')`,
-	// 				(err, result) => {
-	// 					if (err)
-	// 						return res
-	// 							.status(400)
-	// 							.send({ error: "Erro na criação do cadatro" });
-
-	// 					res.status(201).send({
-	// 						msg: "Cadastrado realizado com sucesso",
-	// 					});
-
-	// 					mailer.sendMail(
-	// 						{
-	// 							from: "Rian Zenki <rian.nacazato@hotmail.com>",
-	// 							to: "rian.zenki@gmail.com",
-	// 							subject: "Autenticar conta",
-	// 							template: "auth/autenticar",
-	// 							context: { token },
-	// 						},
-	// 						(err) => {
-	// 							if (err)
-	// 								return res
-	// 									.status(400)
-	// 									.send({
-	// 										error: "Erro ao enviar o email de autenticação",
-	// 									});
-
-	// 							return res.status(200).send({ msg: "Email enviado" });
-	// 						}
-	// 					);
-	// 				}
-	// 			);
-	// 		} else return res.status(401).send({ error: "Email já cadastrado" });
+	// 		return res.status(200).send({ msg: "Email enviado" });
 	// 	}
 	// );
 }
 
-export function login(req, res) {
+export async function login(req, res) {
 	const { email, senha } = req.body;
 
-	db.query(`SELECT * FROM alunos WHERE email = '${email}'`, (err, result) => {
-		if (err)
+	try {
+		const aluno = await prismaClient.aluno.findFirst({
+			where: {
+				email,
+			},
+		});
+
+		if (!aluno)
+			return res.status(400).send({ msg: "Email ou senha inválidos" });
+
+		const senhasIguais = compareSync(senha, aluno.senha);
+
+		// Verifica se a senha informada está incorreta
+		if (!senhasIguais)
 			return res.status(400).json({ error: "Email ou senha inválidos" });
 
-		if (result.length > 0) {
-			const senhasIguais = compareSync(senha, result[0].senha);
+		// Verificar se o usuário está autenticado no banco
+		if (aluno.autenticado === "0")
+			return res.status(401).json({
+				error: "Usuário não autenticado. Verifique seu email!",
+			});
 
-			// Verifica se a senha informada está incorreta
-			if (!senhasIguais)
-				return res.status(400).json({ error: "Email ou senha inválidos" });
+		// Verifica se a senha informada está correta
+		if (senhasIguais) {
+			const dadosAlunoLogin = {
+				id: aluno.idAluno,
+				email: email,
+				nome: aluno.nome,
+			};
 
-			// Verificar se o usuário está autenticado no banco
-			if (result[0].autenticado === "0")
-				return res.status(401).json({
-					error: "Usuário não autenticado. Verifique seu email!",
-				});
-
-			// Verifica se a senha informada está correta
-			if (senhasIguais) {
-				const aluno = {
-					idAluno: result[0].idAluno,
-					email: email,
-					nome: result[0].nome,
-				};
-				return res.status(200).json({
-					aluno,
-					token: sign(aluno, process.env.TOKEN_SECRET),
-				});
-			} else
-				return res.status(400).json({ error: "Email ou senha inválidos" });
-		} else return res.status(400).json({ error: "Email ou senha inválidos" });
-	});
+			return res.status(200).send({
+				dadosAlunoLogin,
+				token: sign(dadosAlunoLogin, process.env.TOKEN_SECRET),
+			});
+		} else return res.status(400).send({ error: "Email ou senha inválidos" });
+	} catch (error) {
+		if (error) return res.status(400).send({ msg: "Falha no login" });
+	}
 }
 
 export function esqueciSenha(req, res) {
@@ -228,31 +205,36 @@ export function alterarSenha(req, res) {
 	);
 }
 
-export function autenticar(req, res) {
+export async function autenticar(req, res) {
 	const token = req.params.token;
 
-	db.query(`SELECT * FROM aluno WHERE token = '${token}'`, (err, result) => {
-		if (err) res.status(400).send({ error: "Token inválido" });
+	try {
+		const aluno = await prismaClient.aluno.findFirst({
+			where: {
+				token,
+			},
+		});
 
-		if (result.length > 0) {
-			if (token !== result[0].token)
-				return res.status(400).send({ error: "Token inválido" });
+		if (!aluno) return res.status(400).send({ msg: "Token inválido" });
 
-			db.query(
-				`
-            UPDATE aluno
-            SET autenticado = '1'
-            WHERE token = '${result[0].token}'
-          `,
-				(err, result) => {
-					if (err)
-						return res
-							.status(400)
-							.send({ error: "Erro na autenticação" });
+		if (token !== aluno.token)
+			return res.status(400).send({ msg: "Token inválido" });
 
-					return res.status(200).redirect("http://localhost:3000/");
-				}
-			);
-		} else return res.status(400).send({ error: "Erro na autenticação" });
-	});
+		const alunoAtualizado = await prismaClient.aluno.update({
+			where: {
+				token,
+			},
+			data: {
+				autenticado: true,
+			},
+		});
+
+		if (!alunoAtualizado)
+			return res.status(400).send({ msg: "Erro na autenticação" });
+
+		return res.status(200).redirect("http://localhost:3000/");
+		// return res.status(200).send({ msg: "Conta autenticada com sucesso" });
+	} catch (error) {
+		if (error) return res.status(400).send({ msg: "Erro na autenticação" });
+	}
 }

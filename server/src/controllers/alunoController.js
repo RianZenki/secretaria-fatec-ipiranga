@@ -1,91 +1,86 @@
-import db from "../services/connection.js";
+import { prismaClient } from "../database/prismaClient.js";
 
-export function consultarDados(req, res) {
+// Exclude keys from user
+function exclude(user, keys) {
+	return Object.fromEntries(
+		Object.entries(user).filter(([key]) => !keys.includes(key))
+	);
+}
+
+export async function consultarDados(req, res) {
 	const { id } = req.body;
 
-	db.query(
-		`SELECT nome, email, curso, turno, ra FROM alunos WHERE id = '${id}'`,
-		(err, result) => {
-			if (err)
-				return res
-					.status(400)
-					.send({ error: "Erro na consulta dos dados" });
+	try {
+		const aluno = await prismaClient.aluno.findFirst({
+			where: {
+				id: id,
+			},
+		});
 
-			if (result.length > 0) {
-				return res.status(200).json(result[0]);
-			} else {
-				return res
-					.status(400)
-					.send({ error: "Erro na consulta dos dados" });
-			}
-		}
-	);
+		if (!aluno) return res.status(400).send({ msg: "Aluno não encontrado" });
+
+		const alunoFiltrado = exclude(aluno, ["senha", "token", "autenticado"]);
+
+		return res.status(200).send(alunoFiltrado);
+	} catch (error) {
+		return res.status(400).send({ error: "Erro na consulta dos dados" });
+	}
 }
 
-export function alterarAluno(req, res) {
-	const { idAluno, nome, email, curso, turno, ra } = req.body;
+export async function alterarAluno(req, res) {
+	const { nome, curso, turno, ra } = req.body;
+	const { id } = req.params;
 
-	db.query(
-		`SELECT * FROM aluno WHERE idAluno =  '${idAluno}'`,
-		(err, result) => {
-			if (err)
-				return res
-					.status(400)
-					.send({ error: "Erro na alteração dos dados" });
+	try {
+		const aluno = await prismaClient.aluno.findFirst({
+			where: {
+				id,
+			},
+		});
 
-			if (result.length > 0) {
-				db.query(
-					`
-                UPDATE aluno
-                SET nome = '${nome}', email = '${email}', curso = '${curso}', turno = '${turno}', ra = '${ra}'
-                WHERE idAluno = '${idAluno}'
-            `,
-					(err, result) => {
-						if (err)
-							return res
-								.status(400)
-								.send({ error: "Erro na alteração dos dados" });
+		if (!aluno) return res.status(400).send({ msg: "Aluno não encontrado" });
 
-						return res
-							.status(200)
-							.json({ msg: "Dados alterado com sucesso" });
-						// alterar os dados do cabeçalho
-					}
-				);
-			} else {
-				return res
-					.status(400)
-					.send({ error: "Erro na alteração dos dados" });
-			}
-		}
-	);
+		const novosDados = await prismaClient.aluno.update({
+			where: {
+				id,
+			},
+			data: {
+				nome,
+				curso,
+				turno,
+				ra,
+			},
+		});
+
+		return res.status(200).send(novosDados);
+	} catch (error) {
+		return res.status(400).send({ error: "Erro na alteração dos dados" });
+	}
 }
 
-export function deletarAluno(req, res) {
-	const id = req.usuario.idAluno;
+export async function deletarAluno(req, res) {
+	const { id } = req.params;
 
-	db.query(`SELECT * FROM aluno WHERE idAluno =  '${id}'`, (err, result) => {
-		if (err)
-			return res.status(400).send({ error: "Erro ao deletar o conta" });
+	try {
+		const aluno = await prismaClient.aluno.findFirst({
+			where: {
+				id,
+			},
+		});
 
-		if (result.length > 0) {
-			db.query(
-				`
-                DELETE FROM aluno WHERE idAluno = '${id}'
-            `,
-				(err, result) => {
-					if (err)
-						return res
-							.status(400)
-							.send({ error: "Erro ao deletar o conta" });
+		if (!aluno) res.status(400).send({ msg: "Aluno não encontrado" });
 
-					return res
-						.status(200)
-						.json({ msg: "Conta deletada com sucesso" });
-				}
-			);
-		} else {
-			return res.status(400).send({ error: "Conta não existente" });
-		}
-	});
+		const alunoDeletado = await prismaClient.aluno.delete({
+			where: {
+				id,
+			},
+		});
+
+		return res
+			.status(200)
+			.send({ msg: "Aluno deletado com sucesso!", alunoDeletado });
+	} catch (error) {
+		if (error)
+			res.status(400).send({ msg: "Erro ao deletar a conta", error });
+	}
 }
