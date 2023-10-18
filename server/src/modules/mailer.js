@@ -1,31 +1,35 @@
-require('dotenv').config();
 
-const nodemailer = require('nodemailer')
-const path = require('path')
-const hbs = require('nodemailer-express-handlebars')
+import { createTransport } from "nodemailer";
+import { resolve } from "path";
+import hbs from "nodemailer-express-handlebars";
+import dotenv from 'dotenv'
 
-const { host, port, user, pass } = require('../config/smtp')
+import { host, port, user, pass } from "../config/smtp.js";
 
-const transport = nodemailer.createTransport({
-  host,
-  port,
-  secure: false,
-  auth: {
-    user,
-    pass,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  }
-})
+dotenv.config();
+const transport = createTransport({
+	host,
+	port,
+	secure: false,
+	auth: {
+		user,
+		pass,
+	},
+	tls: {
+		rejectUnauthorized: false,
+	},
+});
 
-transport.use('compile', hbs({
-  viewEngine: {
-    defaultLayout: undefined,
-    partialsDir: path.resolve('src/resources/mail')
-  },
-  viewPath: path.resolve('src/resources/mail'),
-  extName: '.html'
-}))
+transport.use(
+	"compile",
+	hbs({
+		viewEngine: {
+			defaultLayout: undefined,
+			partialsDir: resolve("src/resources/mail"),
+		},
+		viewPath: resolve("src/resources/mail"),
+		extName: ".html",
+	})
+);
 
-module.exports = transport
+export default transport;

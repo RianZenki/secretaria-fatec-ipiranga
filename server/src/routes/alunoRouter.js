@@ -1,16 +1,16 @@
-const express = require('express')
-const router = express.Router()
+import { Router } from 'express'
 
-const auth = require('../middleware/auth')
-const alunoController = require('../controllers/alunoController')
+import auth from '../middleware/auth.js'
+import { consultarDados, alterarAluno, deletarAluno } from '../controllers/alunoController.js'
 
+const router = Router()
 // Consultar dados do aluno
-router.get('/consultar-dados', auth, alunoController.consultarDados)
+router.get('/', auth, consultarDados)
 
 // Alterar dados do aluno
-router.put('/alterar-dados', auth, alunoController.alterarAluno)
+router.put('/alterar-dados', auth, alterarAluno)
 
 // Deletar dados do aluno
-router.delete('/deletar-aluno/:id', auth, alunoController.deletarAluno)
+router.delete('/deletar-aluno/:id', auth, deletarAluno)
 
-module.exports = router
+export default router

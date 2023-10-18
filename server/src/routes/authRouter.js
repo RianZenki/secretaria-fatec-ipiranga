@@ -1,24 +1,24 @@
-const express = require('express')
-const router = express.Router()
+import { Router } from 'express'
 
-const authController = require('../controllers/authController')
+import { cadastro, login, esqueciSenha, verificarTokenSenha, alterarSenha, autenticar } from '../controllers/authController.js'
 
+const router = Router()
 // Cadastrar novo aluno
-router.post('/cadastro', authController.cadastro)
+router.post('/cadastro', cadastro)
 
 // Realizar login
-router.post('/login', authController.login)
+router.post('/login', login)
 
 // Enviar token de recuperação de senha
-router.post('/esqueci-senha', authController.esqueciSenha)
+router.post('/esqueci-senha', esqueciSenha)
 
 // Verificar token de alteração de senha
-router.get('/alterar-senha/:id/:token', authController.verificarTokenSenha)
+router.get('/alterar-senha/:id/:token', verificarTokenSenha)
 
 // Alterar senha utilizando um token
-router.post('/alterar-senha', authController.alterarSenha)
+router.post('/alterar-senha', alterarSenha)
 
 // Autenticar conta
-router.get('/autenticar/:token', authController.autenticar)
+router.get('/autenticar/:token', autenticar)
 
-module.exports = router
+export default router

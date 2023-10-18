@@ -1,43 +1,49 @@
-const express = require('express')
-const router = express.Router()
-const multer = require('multer')
-const multerConfig = require('../config/multer')
+import { Router } from "express";
+import multer from "multer";
+import { multerConfig } from "../config/multer.js";
 
-const auth = require('../middleware/auth')
-const db = require('../services/connection')
+import auth from "../middleware/auth.js";
+import db from "../services/connection.js";
 
-const solicitacaoController = require('../controllers/solicitacaoController')
+import {
+	novaSolicitacao,
+	listarTodasSolicitacoes,
+	listarSolicitacaoPeloId,
+	listarSolicitacaoAluno,
+	finalizarSolicitacao,
+} from "../controllers/solicitacaoController.js";
 
-router.post('/arquivo', multer(multerConfig).array('file'), (req, res) => {
-  console.log(req.files)
-  console.log(req.body)
+const router = Router();
 
-  const files = req.files.map((file, index) => {
-    return file.filename
-  })
-  
-  console.log(files)
+router.post("/arquivo", multer(multerConfig).array("file"), (req, res) => {
+	console.log(req.files);
+	console.log(req.body);
 
-  // const { tipo, descricao } = req.body
-  // const arquivo = req.file
+	const files = req.files.map((file, index) => {
+		return file.filename;
+	});
 
-  res.send("Documento salvo")
+	console.log(files);
 
-})
+	// const { tipo, descricao } = req.body
+	// const arquivo = req.file
+
+	res.send("Documento salvo");
+});
 
 // Criar nova solicitação
-router.post('/', auth, solicitacaoController.novaSolicitacao)
+router.post("/", auth, novaSolicitacao);
 
 // Listar todas solicitações
-router.get('/', auth, solicitacaoController.listarTodasSolicitacoes)
+router.get("/", auth, listarTodasSolicitacoes);
 
 // Listar solicitação pelo id
-router.get('/:idSolicitacao', auth, solicitacaoController.listarSolicitacaoPeloId)
+router.get("/:idSolicitacao", auth, listarSolicitacaoPeloId);
 
 // Listar solicitações do aluno
-router.get('/aluno/:idAluno', auth, solicitacaoController.listarSolicitacaoAluno)
+router.get("/aluno/:idAluno", auth, listarSolicitacaoAluno);
 
 // Finalizar solicitação
-router.put('/:idSolicitacao', auth, solicitacaoController.finalizarSolicitacao)
+router.put("/:idSolicitacao", auth, finalizarSolicitacao);
 
-module.exports = router
+export default router;

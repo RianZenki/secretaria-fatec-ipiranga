@@ -1,10 +1,10 @@
-const mysql = require('mysql')
+import { createPool } from "mysql";
 
-const db = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "db_secretaria_fatec_ipiranga"
-})
+const db = createPool({
+	host: "localhost",
+	user: "root",
+	password: "admin",
+	database: "Req",
+});
 
-module.exports = db
+export default db;

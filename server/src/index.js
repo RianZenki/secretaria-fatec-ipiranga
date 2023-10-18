@@ -1,23 +1,23 @@
-require('dotenv').config();
+import express, { json } from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-const express = require('express')
-const cors = require('cors')
+import alunoRouter from "./routes/alunoRouter.js";
+import authRouter from "./routes/authRouter.js";
+import solicitacaoRouter from "./routes/solicitacaoRouter.js";
+import respostaRouter from "./routes/respostaRouter.js";
 
-const alunoRouter = require('./routes/alunoRouter')
-const authRouter = require('./routes/authRouter')
-const solicitacaoRouter = require('./routes/solicitacaoRouter')
-const respostaRouter = require('./routes/respostaRouter')
+dotenv.config();
+const app = express();
 
-const app = express()
+app.use(json());
+app.use(cors());
 
-app.use(express.json())
-app.use(cors())
-
-app.use('/auth', authRouter)
-app.use('/aluno', alunoRouter)
-app.use('/solicitacao', solicitacaoRouter)
-app.use('/resposta', respostaRouter)
+app.use("/auth", authRouter);
+app.use("/aluno", alunoRouter);
+app.use("/solicitacao", solicitacaoRouter);
+app.use("/resposta", respostaRouter);
 
 app.listen(3001, () => {
-  console.log("Rodando na porta 3001")
-})
+	console.log("Rodando na porta 3001");
+});

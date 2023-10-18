@@ -1,8 +1,12 @@
-const multer = require('multer')
-const path = require('path')
-const crypto = require('crypto')
+import multer from 'multer'
+import path from 'path'
+import crypto from 'crypto'
+import * as url from 'url';
 
-module.exports = {
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+
+export const multerConfig = {
   dest: path.resolve(__dirname, '..', '..', 'temp', 'uploads'),
   storage: multer.diskStorage({
     destination: (req, file, cb) => {

@@ -1,14 +1,14 @@
-const express = require('express')
-const router = express.Router()
+import { Router } from "express";
 
-const auth = require('../middleware/auth')
+import auth from "../middleware/auth.js";
 
-const respostaController = require('../controllers/respostaController')
+import { novaResposta, listarRespostas } from "../controllers/respostaController.js";
 
+const router = Router();
 // Criar nova respsota
-router.post('/', auth, respostaController.novaResposta)
+router.post("/", auth, novaResposta);
 
 // Listar respostas de uma solicitação
-router.get('/:idSolicitacao', auth, respostaController.listarRespostas)
+router.get("/:idSolicitacao", auth, listarRespostas);
 
-module.exports = router
+export default router;
