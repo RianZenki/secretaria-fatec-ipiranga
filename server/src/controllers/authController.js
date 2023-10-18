@@ -29,9 +29,25 @@ export async function cadastro(req, res) {
 			},
 		});
 
-		return res
-			.status(200)
-			.send({ msg: "Aluno cadastrado com sucesso!", aluno });
+		mailer.sendMail(
+			{
+				from: "Rian Zenki <rian.nacazato@hotmail.com>",
+				to: "rian.zenki@gmail.com",
+				subject: "Autenticar conta",
+				template: "auth/autenticar",
+				context: { token },
+			},
+			(err) => {
+				if (err)
+					return res.status(400).send({
+						error: "Erro ao enviar o email de autenticação",
+					});
+
+				return res
+					.status(200)
+					.send({ aluno, msg: "Email enviado para autenticação" });
+			}
+		);
 	} catch (error) {
 		if (error instanceof Prisma.PrismaClientKnownRequestError) {
 			if (error.code === "P2002") {
@@ -50,24 +66,6 @@ export async function cadastro(req, res) {
 		}
 		return res.status(500).send(error);
 	}
-
-	// mailer.sendMail(
-	// 	{
-	// 		from: "Rian Zenki <rian.nacazato@hotmail.com>",
-	// 		to: "rian.zenki@gmail.com",
-	// 		subject: "Autenticar conta",
-	// 		template: "auth/autenticar",
-	// 		context: { token },
-	// 	},
-	// 	(err) => {
-	// 		if (err)
-	// 			return res.status(400).send({
-	// 				error: "Erro ao enviar o email de autenticação",
-	// 			});
-
-	// 		return res.status(200).send({ msg: "Email enviado" });
-	// 	}
-	// );
 }
 
 export async function login(req, res) {
@@ -90,7 +88,7 @@ export async function login(req, res) {
 			return res.status(400).json({ error: "Email ou senha inválidos" });
 
 		// Verificar se o usuário está autenticado no banco
-		if (aluno.autenticado === "0")
+		if (aluno.autenticado === false)
 			return res.status(401).json({
 				error: "Usuário não autenticado. Verifique seu email!",
 			});
