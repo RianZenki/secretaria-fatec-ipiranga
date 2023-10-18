@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Aluno {
+  id           String        @id @default(uuid())
+  nome         String
+  email        String        @unique
+  curso        String
+  turno        String
+  ra           String        @unique
+  senha        String
+  token        String        @unique
+  autenticado  Boolean       @default(false)
+  solicitacoes Solicitacao[]
+
+  @@map("alunos")
+}
+
+model Solicitacao {
+  id            String    @id @default(uuid())
+  tipo          String
+  descricao     String
+  status        String
+  criado_em     DateTime  @default(now())
+  atualizado_em DateTime?
+  encerrado_em  DateTime?
+  Aluno         Aluno?    @relation(fields: [alunoId], references: [id])
+  alunoId       String?
+  arquivo       Arquivo[]
+
+  @@map("solicitacoes")
+}
+
+model Arquivo {
+  id            String       @id @default(uuid())
+  nome          String
+  Solicitacao   Solicitacao? @relation(fields: [solicitacaoId], references: [id])
+  solicitacaoId String?
+
+  @@map("arquivos")
+}
+
+// model Resposta {
+
+// }
+
+// model Departamento {
+
+// }
+
+// model Secretario {
+
+// }
