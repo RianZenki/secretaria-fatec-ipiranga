@@ -1,134 +1,93 @@
-import db from "../services/connection.js";
+import { prismaClient } from "../database/prismaClient.js";
 
-export function novaSolicitacao(req, res) {
-	const { descricao, tipo } = req.body;
-	const idAluno = req.usuario.idAluno;
+export async function novaSolicitacao(req, res) {
+	const { descricao, tipo, alunoId } = req.body;
 
-	const dataAtual = new Date().toISOString().slice(0, 10);
+	try {
+		const solicitacao = await prismaClient.solicitacao.create({
+			data: {
+				descricao,
+				tipo,
+				alunoId,
+			},
+		});
 
-	db.query(
-		`INSERT INTO solicitacao (idAluno, descricao, tipo, dataCriacao) VALUES (${idAluno}, '${descricao}', '${tipo}', '${dataAtual}')`,
-		(err, result) => {
-			if (err) {
-				return res
-					.status(400)
-					.send({ error: "Erro na criação da solicitação" });
-			}
-			return res
-				.status(200)
-				.send({ msg: "Solicitação cadastrada com sucesso" });
-		}
-	);
-}
-
-export function listarTodasSolicitacoes(req, res) {
-	db.query(
-		`
-    SELECT s.idSolicitacao, s.tipo, s.descricao, a.nome, a.idAluno
-    FROM solicitacao s
-    JOIN aluno a
-    ON s.idAluno = a.idAluno
-    `,
-		(err, result) => {
-			if (err)
-				return res
-					.status(400)
-					.send({ error: "Erro na listagem das solicitações" });
-
-			return res.status(200).send({ result });
-		}
-	);
-}
-
-export function listarSolicitacaoPeloId(req, res) {
-	const idSolicitacao = req.params.idSolicitacao;
-
-	db.query(
-		`
-    SELECT s.idSolicitacao, s.tipo, s.descricao, a.nome, a.idAluno
-    FROM solicitacao s
-    JOIN aluno a
-    ON s.idAluno = a.idAluno
-    WHERE s.idSolicitacao = '${idSolicitacao}'
-    `,
-		(err, result) => {
-			if (err)
-				return res
-					.status(400)
-					.send({ error: "Erro na listagem da solicitação" });
-
-			if (result.length > 0) return res.status(200).send({ result });
-
+		return res
+			.status(200)
+			.send({ msg: "Solicitação criada com sucesso!", solicitacao });
+	} catch (error) {
+		if (error)
 			return res
 				.status(400)
-				.send({ error: "Erro na listagem da solicitação" });
-		}
-	);
+				.send({ msg: "Erro na criação da solicitação", error });
+	}
 }
 
-export function listarSolicitacaoAluno(req, res) {
-	const idAluno = req.params.idAluno;
+export async function listarTodasSolicitacoes(req, res) {
+	try {
+		const solicitacao = await prismaClient.solicitacao.findMany();
 
-	db.query(
-		`
-    SELECT s.idSolicitacao, s.tipo, s.descricao, a.nome, a.idAluno
-    FROM solicitacao s
-    JOIN aluno a
-    ON s.idAluno = a.idAluno
-    WHERE s.idAluno = '${idAluno}'
-    `,
-		(err, result) => {
-			if (err)
-				return res
-					.status(400)
-					.send({ error: "Erro na listagem da solicitação" });
-
-			return res.status(200).send({ result });
-		}
-	);
+		return res.status(200).send(solicitacao);
+	} catch (error) {
+		if (error)
+			return res
+				.status(400)
+				.send({ msg: "Erro ao obter a solicitação", error });
+	}
 }
 
-export function finalizarSolicitacao(req, res) {
-	const idSolicitacao = req.params.idSolicitacao;
-	const status = req.body.status;
+export async function listarSolicitacaoPeloId(req, res) {
+	const { solicitacaoId } = req.params;
 
-	const dataAtual = new Date().toISOString().slice(0, 10);
+	try {
+		const solicitacao = await prismaClient.solicitacao.findFirstOrThrow({
+			where: {
+				id: solicitacaoId,
+			},
+		});
 
-	db.query(
-		`
-    SELECT * FROM solicitacao
-    WHERE idSolicitacao = '${idSolicitacao}'
-    `,
-		(err, result) => {
-			if (err)
-				return res
-					.status(400)
-					.send({ error: "Solicitação não encontrada" });
+		return res.status(200).send(solicitacao);
+	} catch (error) {
+		if (error)
+			return res
+				.status(400)
+				.send({ msg: "Erro ao obter a solicitação", error });
+	}
+}
 
-			if (result.length > 0) {
-				db.query(
-					`
-          UPDATE solicitacao
-          SET status = '${status}', dataTermino = '${dataAtual}'
-          WHERE idSolicitacao = '${idSolicitacao}' 
-        `,
-					(err, result) => {
-						if (err)
-							return res
-								.status(400)
-								.send({ error: "Erro na alteração do status" });
-						else
-							return res
-								.status(200)
-								.send({
-									msg: "Status da solicitação alterado com sucesso",
-								});
-					}
-				);
-			} else
-				return res
-					.status(400)
-					.send({ error: "Solicitação não encontrada" });
-		}
-	);
+export async function alterarSolicitacao(req, res) {
+	const { solicitacaoId } = req.params;
+	const { status } = req.body;
+
+	// const dataAtual = new Date().toISOString().slice(0, 10);
+
+	try {
+		await prismaClient.solicitacao.findFirstOrThrow({
+			where: {
+				id: solicitacaoId,
+			},
+		});
+
+		const solicitacaoAlterada = await prismaClient.solicitacao.update({
+			where: {
+				id: solicitacaoId,
+			},
+			data: {
+				status,
+				atualizado_em: new Date(),
+				encerrado_em: status === "finalizado" ? new Date() : null,
+			},
+		});
+
+		return res.status(200).send({
+			msg: "Solicitação alterada com sucesso",
+			solicitacaoAlterada,
+		});
+	} catch (error) {
+		if (error)
+			return res.status(400).send({
+				msg: "Erro ao tentar alterar os dados da solicitação",
+				error,
+			});
+	}
 }

@@ -3,14 +3,12 @@ import multer from "multer";
 import { multerConfig } from "../config/multer.js";
 
 import auth from "../middleware/auth.js";
-import db from "../services/connection.js";
 
 import {
 	novaSolicitacao,
 	listarTodasSolicitacoes,
 	listarSolicitacaoPeloId,
-	listarSolicitacaoAluno,
-	finalizarSolicitacao,
+	alterarSolicitacao,
 } from "../controllers/solicitacaoController.js";
 
 const router = Router();
@@ -38,12 +36,11 @@ router.post("/", auth, novaSolicitacao);
 router.get("/", auth, listarTodasSolicitacoes);
 
 // Listar solicitação pelo id
-router.get("/:idSolicitacao", auth, listarSolicitacaoPeloId);
+router.get("/:solicitacaoId", auth, listarSolicitacaoPeloId);
 
-// Listar solicitações do aluno
-router.get("/aluno/:idAluno", auth, listarSolicitacaoAluno);
+// Listar solicitação por departamento
 
 // Finalizar solicitação
-router.put("/:idSolicitacao", auth, finalizarSolicitacao);
+router.put("/:solicitacaoId", auth, alterarSolicitacao);
 
 export default router;

@@ -84,3 +84,21 @@ export async function deletarAluno(req, res) {
 			res.status(400).send({ msg: "Erro ao deletar a conta", error });
 	}
 }
+
+export async function listarSolicitacaoAluno(req, res) {
+	const { alunoId } = req.params
+
+	try {
+		const solicitacoes = await prismaClient.solicitacao.findMany({
+			where: {
+				alunoId
+			}
+		})
+
+		return res.status(200).send(solicitacoes)
+	}
+	catch (error) {
+		if (error)
+			return res.status(400).send({ msg: "Erro ao listar a solicitação", error })
+	}
+}

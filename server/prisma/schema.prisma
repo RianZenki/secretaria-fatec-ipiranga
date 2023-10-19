@@ -30,13 +30,13 @@ model Solicitacao {
   id            String     @id @default(uuid())
   tipo          String
   descricao     String
-  status        String
+  status        String     @default("em andamento")
   criado_em     DateTime   @default(now())
-  atualizado_em DateTime?
+  atualizado_em DateTime   @default(now())
   encerrado_em  DateTime?
   Aluno         Aluno?     @relation(fields: [alunoId], references: [id])
   alunoId       String?
-  arquivo       Arquivo[]
+  Arquivo       Arquivo[]
   Resposta      Resposta[]
 
   @@map("solicitacoes")
@@ -65,12 +65,16 @@ model Resposta {
   aluno         Aluno?      @relation(fields: [alunoId], references: [id])
   alunoId       String?
   //secretario
+
+  @@map("respostas")
 }
 
 model Departamento {
   id                      String                    @id @default(uuid())
   nome                    String
   Departamento_secretario Departamento_secretario[]
+
+  @@map("departamentos")
 }
 
 model Secretario {
@@ -81,6 +85,8 @@ model Secretario {
   senha                   String
   token                   String                    @unique
   Departamento_secretario Departamento_secretario[]
+
+  @@map("secretarios")
 }
 
 model Departamento_secretario {
@@ -89,4 +95,6 @@ model Departamento_secretario {
   secretario     Secretario   @relation(fields: [secretarioId], references: [id])
   departamentoId String
   secretarioId   String
+
+  @@map("departamentos_secretarios")
 }

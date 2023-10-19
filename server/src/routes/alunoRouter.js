@@ -1,16 +1,24 @@
-import { Router } from 'express'
+import { Router } from "express";
 
-import auth from '../middleware/auth.js'
-import { consultarDados, alterarAluno, deletarAluno } from '../controllers/alunoController.js'
+import auth from "../middleware/auth.js";
+import {
+	consultarDados,
+	alterarAluno,
+	deletarAluno,
+	listarSolicitacaoAluno,
+} from "../controllers/alunoController.js";
 
-const router = Router()
+const router = Router();
 // Consultar dados do aluno
-router.get('/', auth, consultarDados)
+router.get("/", auth, consultarDados);
 
 // Alterar dados do aluno
-router.put('/:id', auth, alterarAluno)
+router.put("/:id", auth, alterarAluno);
 
 // Deletar dados do aluno
-router.delete('/:id', auth, deletarAluno)
+router.delete("/:id", auth, deletarAluno);
 
-export default router
+// Listar solicitações do aluno
+router.get("/:alunoId/solicitacao", auth, listarSolicitacaoAluno);
+
+export default router;
