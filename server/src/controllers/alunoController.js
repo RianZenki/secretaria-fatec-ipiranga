@@ -32,7 +32,7 @@ export async function alterarAluno(req, res) {
 	const { id } = req.params;
 
 	try {
-		const aluno = await prismaClient.aluno.findFirst({
+		const aluno = await prismaClient.aluno.findFirstOrThrow({
 			where: {
 				id,
 			},
