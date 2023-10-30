@@ -9,6 +9,8 @@ import {
 	listarTodasSolicitacoes,
 	listarSolicitacaoPeloId,
 	alterarSolicitacao,
+	deletarSolicitacao,
+	listarRespostasPeloId
 } from "../controllers/solicitacaoController.js";
 
 const router = Router();
@@ -38,9 +40,15 @@ router.get("/", auth, listarTodasSolicitacoes);
 // Listar solicitação pelo id
 router.get("/:solicitacaoId", auth, listarSolicitacaoPeloId);
 
+// Listar respostas de uma solicitação
+router.get("/:solicitacaoId/resposta", auth, listarRespostasPeloId);
+
 // Listar solicitação por departamento
 
 // Finalizar solicitação
 router.put("/:solicitacaoId", auth, alterarSolicitacao);
+
+// Deletar solicitação pelo Id
+router.delete("/:solicitacaoId", auth, deletarSolicitacao)
 
 export default router;

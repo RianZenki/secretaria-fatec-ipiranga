@@ -55,6 +55,35 @@ export async function listarSolicitacaoPeloId(req, res) {
 	}
 }
 
+
+export async function listarRespostasPeloId(req, res) {
+	const { solicitacaoId } = req.params;
+
+	console.log(req)
+
+	try {
+		await prismaClient.solicitacao.findFirstOrThrow({
+			where: {
+				id: solicitacaoId,
+			},
+		});
+
+		const respostas = await prismaClient.resposta.findMany({
+			where: {
+				solicitacaoId,
+			},
+		});
+
+		return res.status(200).send({ respostas });
+	} catch (error) {
+		if (error)
+			return res
+				.status(400)
+				.send({ msg: "Erro ao listar respostas", error });
+	}
+}
+
+
 export async function alterarSolicitacao(req, res) {
 	const { solicitacaoId } = req.params;
 	const { status } = req.body;
@@ -89,5 +118,32 @@ export async function alterarSolicitacao(req, res) {
 				msg: "Erro ao tentar alterar os dados da solicitação",
 				error,
 			});
+	}
+}
+
+export async function deletarSolicitacao(req, res) {
+	const { solicitacaoId } = req.params;
+
+	try {
+		await prismaClient.solicitacao.findUniqueOrThrow({
+			where: {
+				id: solicitacaoId,
+			},
+		});
+
+		const solicitacao = prismaClient.solicitacao.delete({
+			where: {
+				id: solicitacaoId,
+			},
+		});
+
+		return res
+			.status(200)
+			.send({ msg: "Solicitação criada com sucesso", solicitacao });
+	} catch (error) {
+		if (error)
+			return res
+				.status(400)
+				.send({ msg: "Erro ao tentar deletar a solicitação", error });
 	}
 }
