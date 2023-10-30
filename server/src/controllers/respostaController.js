@@ -1,75 +1,32 @@
-import db from "../services/connection.js";
+import { prismaClient } from "../database/prismaClient.js";
 
-export function novaResposta(req, res) {
-	const { descricao, idSolicitacao, criadoPor } = req.body;
+export async function novaResposta(req, res) {
+	const { descricao, solicitacaoId, criadoPor, origem, usuarioId } = req.body;
 
-	const dataAtual = new Date().toISOString().slice(0, 10);
+	try {
+		if (origem !== "aluno" || origem !== "secretario")
+			return res.status(400).send({ msg: "Erro na criação da resposta" });
 
-	db.query(
-		`
-      SELECT * FROM solicitacao WHERE idSolicitacao = '${idSolicitacao}'
-    `,
-		(err, result) => {
-			if (err)
-				return res
-					.status(400)
-					.send({ error: "Solicitação não encontrada" });
+		const resposta = await prismaClient.resposta.create({
+			data: {
+				descricao,
+				origem,
+				criado_por: criadoPor,
+				solicitacaoId,
+				alunoId: origem === "aluno" ? usuarioId : null,
+				secretarioId: origem === "secretario" ? usuarioId : null,
+			},
+		});
+		if (!resposta)
+			return res.status(400).send({ msg: "Erro na criação da resposta" });
 
-			if (result.length > 0) {
-				db.query(
-					`
-            INSERT INTO resposta (idSolicitacao, descricao, dataCriacao,criadoPor) VALUES ('${idSolicitacao}', '${descricao}', '${dataAtual}', '${criadoPor}')
-          `,
-					(err, result) => {
-						if (err)
-							return res
-								.status(400)
-								.send({ error: "Erro na criação da resposta" });
-
-						return res
-							.status(200)
-							.send({ msg: "Resposta criada com sucesso" });
-					}
-				);
-			} else
-				return res
-					.status(400)
-					.send({ error: "Solicitação não encontrada" });
-		}
-	);
-}
-
-export function listarRespostas(req, res) {
-	const idSolicitacao = req.params.idSolicitacao;
-
-	db.query(
-		`
-    SELECT * FROM solicitacao WHERE idSolicitacao = '${idSolicitacao}'
-  `,
-		(err, result) => {
-			if (err) {
-				console.log(err);
-				return res
-					.status(400)
-					.send({ error: "Solicitação não encontrada" });
-			}
-
-			if (result.length > 0) {
-				db.query(
-					`
-         SELECT * FROM resposta WHERE idSolicitacao = '${idSolicitacao}'
-        `,
-					(err, result) => {
-						if (err)
-							return res
-								.status(400)
-								.send({ error: "Resposta não encontrada" });
-
-						return res.status(200).send({ result });
-					}
-				);
-			} else
-				return res.status(400).send({ error: "Resposta não encontrada" });
-		}
-	);
+		return res
+			.status(200)
+			.send({ msg: "Resposta criada com sucesso", resposta });
+	} catch (error) {
+		if (error)
+			return res
+				.status(400)
+				.send({ msg: "Erro na criação da resposta", error });
+	}
 }
