@@ -20,6 +20,7 @@ model Aluno {
   senha        String
   token        String        @unique
   autenticado  Boolean       @default(false)
+  cargo        Cargo         @default(ALUNO)
   solicitacoes Solicitacao[]
   Resposta     Resposta[]
 
@@ -27,17 +28,18 @@ model Aluno {
 }
 
 model Solicitacao {
-  id            String     @id @default(uuid())
-  tipo          String
+  id            String      @id @default(uuid())
+  tipo_pedido   Tipo_pedido @relation(fields: [tipo_pedidoId], references: [id])
   descricao     String
-  status        String     @default("em andamento")
-  criado_em     DateTime   @default(now())
-  atualizado_em DateTime   @default(now())
+  status        String      @default("em andamento")
+  criado_em     DateTime    @default(now())
+  atualizado_em DateTime    @default(now())
   encerrado_em  DateTime?
-  Aluno         Aluno?     @relation(fields: [alunoId], references: [id])
-  alunoId       String?
+  Aluno         Aluno       @relation(fields: [alunoId], references: [id])
+  alunoId       String
   Arquivo       Arquivo[]
   Resposta      Resposta[]
+  tipo_pedidoId Int
 
   @@map("solicitacoes")
 }
@@ -57,44 +59,54 @@ model Resposta {
   id            String      @id @default(uuid())
   solicitacaoId String
   solicitcao    Solicitacao @relation(fields: [solicitacaoId], references: [id])
-  remetente     String
   descricao     String
   arquivo       Arquivo[]
   criado_em     DateTime    @default(now())
-  origem        String
+  criado_por    String // nome
+  cargo         Cargo // aluno || secretario
   aluno         Aluno?      @relation(fields: [alunoId], references: [id])
   alunoId       String?
-  //secretario
+  secretario    Secretario? @relation(fields: [secretarioId], references: [id])
+  secretarioId  String?
 
   @@map("respostas")
 }
 
-model Departamento {
-  id                      String                    @id @default(uuid())
-  nome                    String
-  Departamento_secretario Departamento_secretario[]
+model Tipo_pedido {
+  id                     Int                      @id @default(autoincrement())
+  tipo                   String                   @unique
+  Tipo_pedido_secretario Tipo_pedido_secretario[]
+  Solicitacao            Solicitacao[]
 
-  @@map("departamentos")
+  @@map("tipos_pedidos")
 }
 
 model Secretario {
-  id                      String                    @id @default(uuid())
-  numeroMatricula         String                    @unique
-  nome                    String
-  email                   String                    @unique
-  senha                   String
-  token                   String                    @unique
-  Departamento_secretario Departamento_secretario[]
+  id                     String                   @id @default(uuid())
+  numeroMatricula        String                   @unique
+  nome                   String
+  email                  String                   @unique
+  senha                  String
+  token                  String                   @unique
+  cargo                  Cargo                    @default(SECRETARIO) // secretario || secretario geral
+  tipo_pedido_secretario Tipo_pedido_secretario[]
+  Resposta               Resposta[]
 
   @@map("secretarios")
 }
 
-model Departamento_secretario {
-  id             String       @id @default(uuid())
-  departamento   Departamento @relation(fields: [departamentoId], references: [id])
-  secretario     Secretario   @relation(fields: [secretarioId], references: [id])
-  departamentoId String
-  secretarioId   String
+model Tipo_pedido_secretario {
+  id            String      @id @default(uuid())
+  tipo_pedido   Tipo_pedido @relation(fields: [tipo_pedidoId], references: [id])
+  secretario    Secretario  @relation(fields: [secretarioId], references: [id])
+  secretarioId  String
+  tipo_pedidoId Int
 
-  @@map("departamentos_secretarios")
+  @@map("tipo_pedidos_secretarios")
+}
+
+enum Cargo {
+  ALUNO
+  SECRETARIO
+  SECRETARIO_GERAL
 }
