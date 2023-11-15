@@ -7,6 +7,7 @@ import {
 	listarSecretarioPeloId,
 	alterarSecretario,
 	deletarSecretario,
+	listarSolicitacaoPeloTipo,
 } from "../controllers/secretarioController.js";
 import auth from "../middleware/auth.js";
 
@@ -29,5 +30,8 @@ router.put("/:secretarioId", auth, alterarSecretario);
 
 // Deleta secretario pelo Id
 router.delete("/:secretarioId", auth, deletarSecretario);
+
+// Listar solicitação pelos tipos de pedido
+router.get("/:secretarioId/solicitacoes", auth, listarSolicitacaoPeloTipo);
 
 export default router;
