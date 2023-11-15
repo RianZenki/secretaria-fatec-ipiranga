@@ -10,7 +10,7 @@ import {
 	listarSolicitacaoPeloId,
 	alterarSolicitacao,
 	deletarSolicitacao,
-	listarRespostasPeloId
+	listarRespostasPeloId,
 } from "../controllers/solicitacaoController.js";
 
 const router = Router();
@@ -42,8 +42,6 @@ router.get("/:solicitacaoId", auth, listarSolicitacaoPeloId);
 
 // Listar respostas de uma solicitação
 router.get("/:solicitacaoId/resposta", auth, listarRespostasPeloId);
-
-// Listar solicitação por departamento
 
 // Finalizar solicitação
 router.put("/:solicitacaoId", auth, alterarSolicitacao);

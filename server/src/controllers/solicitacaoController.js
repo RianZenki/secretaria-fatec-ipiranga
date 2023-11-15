@@ -7,7 +7,7 @@ export async function novaSolicitacao(req, res) {
 		const solicitacao = await prismaClient.solicitacao.create({
 			data: {
 				descricao,
-				tipo,
+				tipo_pedidoId: +tipo,
 				alunoId,
 			},
 		});
@@ -55,11 +55,8 @@ export async function listarSolicitacaoPeloId(req, res) {
 	}
 }
 
-
 export async function listarRespostasPeloId(req, res) {
 	const { solicitacaoId } = req.params;
-
-	console.log(req)
 
 	try {
 		await prismaClient.solicitacao.findFirstOrThrow({
@@ -82,7 +79,6 @@ export async function listarRespostasPeloId(req, res) {
 				.send({ msg: "Erro ao listar respostas", error });
 	}
 }
-
 
 export async function alterarSolicitacao(req, res) {
 	const { solicitacaoId } = req.params;
