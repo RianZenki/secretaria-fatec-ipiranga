@@ -1,20 +1,24 @@
 import { prismaClient } from "../database/prismaClient.js";
 
 export async function novaResposta(req, res) {
-	const { descricao, solicitacaoId, criadoPor, origem, usuarioId } = req.body;
+	const { descricao, solicitacaoId, criadoPor, cargo, usuarioId } = req.body;
+	const cargoValido =
+		cargo !== "ALUNO" ||
+		cargo !== "SECRETARIO" ||
+		cargo !== "SECRETARIO_GERAL";
 
 	try {
-		if (origem !== "aluno" || origem !== "secretario")
+		if (!cargoValido)
 			return res.status(400).send({ msg: "Erro na criação da resposta" });
 
 		const resposta = await prismaClient.resposta.create({
 			data: {
 				descricao,
-				origem,
+				cargo,
 				criado_por: criadoPor,
 				solicitacaoId,
-				alunoId: origem === "aluno" ? usuarioId : null,
-				secretarioId: origem === "secretario" ? usuarioId : null,
+				alunoId: cargo === "ALUNO" ? usuarioId : null,
+				secretarioId: cargo !== "ALUNO" ? usuarioId : null,
 			},
 		});
 		if (!resposta)
@@ -25,8 +29,8 @@ export async function novaResposta(req, res) {
 			.send({ msg: "Resposta criada com sucesso", resposta });
 	} catch (error) {
 		if (error)
-			return res
-				.status(400)
-				.send({ msg: "Erro na criação da resposta", error });
+		return res
+			.status(400)
+			.send({ msg: "Erro na criação da resposta", error });
 	}
 }
