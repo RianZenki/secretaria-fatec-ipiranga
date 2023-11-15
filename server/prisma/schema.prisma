@@ -29,24 +29,24 @@ model Aluno {
 
 model Solicitacao {
   id            String      @id @default(uuid())
-  tipo_pedido   Tipo_pedido @relation(fields: [tipo_pedidoId], references: [id])
+  tipo_pedidoId Int
   descricao     String
   status        String      @default("em andamento")
   criado_em     DateTime    @default(now())
   atualizado_em DateTime    @default(now())
   encerrado_em  DateTime?
-  Aluno         Aluno       @relation(fields: [alunoId], references: [id])
   alunoId       String
   Arquivo       Arquivo[]
   Resposta      Resposta[]
-  tipo_pedidoId Int
+  Aluno         Aluno       @relation(fields: [alunoId], references: [id])
+  tipo_pedido   Tipo_pedido @relation(fields: [tipo_pedidoId], references: [id])
 
   @@map("solicitacoes")
 }
 
 model Arquivo {
   id            String       @id @default(uuid())
-  nome          String
+  nome          String       @unique
   Solicitacao   Solicitacao? @relation(fields: [solicitacaoId], references: [id])
   solicitacaoId String?
   Resposta      Resposta?    @relation(fields: [respostaId], references: [id])
@@ -109,4 +109,9 @@ enum Cargo {
   ALUNO
   SECRETARIO
   SECRETARIO_GERAL
+}
+
+enum Status {
+  EM_ANDAMENTO
+  FINALIZADO
 }
