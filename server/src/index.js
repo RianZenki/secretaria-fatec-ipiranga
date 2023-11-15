@@ -8,6 +8,7 @@ import solicitacaoRouter from "./routes/solicitacaoRouter.js";
 import respostaRouter from "./routes/respostaRouter.js";
 import tipoPedidoRouter from "./routes/tipoPedidoRouter.js";
 import secretarioRouter from "./routes/secretarioRouter.js";
+import tipoPedidoSecretarioRouter from "./routes/tipoPedidoSecretarioRouter.js";
 
 dotenv.config();
 const app = express();
@@ -21,6 +22,7 @@ app.use("/solicitacao", solicitacaoRouter);
 app.use("/resposta", respostaRouter);
 app.use("/tipo-pedido", tipoPedidoRouter);
 app.use("/secretario", secretarioRouter);
+app.use("/tipo-pedido-secre", tipoPedidoSecretarioRouter);
 
 app.listen(3001, () => {
 	console.log("Rodando na porta 3001");
