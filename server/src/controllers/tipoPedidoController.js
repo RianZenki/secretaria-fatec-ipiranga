@@ -14,7 +14,6 @@ export async function novoTipoPedido(req, res) {
 			.status(200)
 			.send({ msg: "Tipo de pedido criado com sucesso", pedido });
 	} catch (error) {
-		console.log(error)
 		if (error)
 			return res
 				.status(400)
@@ -67,29 +66,25 @@ export async function listarTiposPedidos(req, res) {
 export async function deletarTipoPedido(req, res) {
 	const { pedidoId } = req.params;
 
+
 	try {
-		const pedido = await prismaClient.tipo_pedido.findFirst({
+		await prismaClient.tipo_pedido.findFirstOrThrow({
 			where: {
-				id: pedidoId,
+				id: +pedidoId,
 			},
 		});
-
-		if (!pedido)
-			return res
-				.status(400)
-				.send({ msg: "Falha ao deletar tipo de pedido" });
 
 		const pedidoDeletado = await prismaClient.tipo_pedido.delete({
 			where: {
-				id: pedidoId,
-			},
-		});
+				id: +pedidoId
+			}
+		})
 
 		res.status(200).send({
 			msg: "Tipo de pedido deletado com sucesso",
 			pedidoDeletado,
 		});
 	} catch (error) {
-		return res.status(400).send({ msg: "Falha ao deletar tipo de pedido" });
+		return res.status(400).send({ msg: "Falha ao deletar tipo de pedido", error });
 	}
 }
