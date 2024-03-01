@@ -45,33 +45,34 @@ const AuthProvider = (props) => {
       .then(response => {
         const dados = response.data
 
-
-        if(response.status === 401) {
-          setDados({...dados, tipo: "aviso"})
-          setLoading(false)
-          setMostrandoAlert(true)
-          return
-        }
-
-        if(response.status === 400) {
-          setDados({...dados, tipo: "erro"})
-          setLoading(false)
-          setMostrandoAlert(true)
-          return
-        }
-
         if (dados.token && response.status === 200) {
-          setAluno(dados.aluno)
+          setAluno(dados.dadosAlunoLogin)
           setAutenticado(true)
   
           api.defaults.headers['Authorization'] = `Bearer ${dados.token}`
   
-          localStorage.setItem('aluno', JSON.stringify(dados.aluno))
+          localStorage.setItem('aluno', JSON.stringify(dados.dadosAlunoLogin))
           localStorage.setItem('token', dados.token)
           navigate("/home")
         }
       })
+      .catch(error => {
+        const res = error.response
 
+        console.log(res)
+
+        if(res.status === 401) {
+          setDados({...res.data, tipo: "aviso"})
+        }
+
+        if(res.status === 400) {
+          setDados({...res.data, tipo: "erro"})
+        }
+
+        setLoading(false)
+        setMostrandoAlert(true)
+        return
+      })
 
   }
 

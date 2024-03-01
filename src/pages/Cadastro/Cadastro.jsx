@@ -53,7 +53,12 @@ export const Cadastro = () => {
       >
 
         <div className={styles["form-container"]}>
-        <Link to="/" style={{textDecoration: "none"}}><span className={styles["voltar"]}> <CaretLeft size={24} /> Voltar</span></Link>
+          <Link to="/" style={{textDecoration: "none"}}>
+            <span className={styles["voltar"]}>
+              <CaretLeft size={24} />
+              Voltar
+            </span>
+          </Link>
           <div className={styles["titulo-container"]}>
             <h1>Cadastro</h1>
             <h2>Crie seu cadastro para realizar suas solicitações</h2>
@@ -119,7 +124,7 @@ export const Cadastro = () => {
                   </label>
                 </div>
 
-                <TextInput titulo="RA" nome="ra" placeholder="0000000000000" />
+                <TextInput titulo="RA" nome="ra" max="13" placeholder="0000000000000" />
               </div>
 
               <div className={styles["wrap-input"]}>

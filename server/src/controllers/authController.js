@@ -229,7 +229,6 @@ export async function autenticar(req, res) {
 
 		if (!alunoAtualizado)
 			return res.status(400).send({ msg: "Erro na autenticação" });
-
 		return res.status(200).redirect("http://localhost:3000/");
 		// return res.status(200).send({ msg: "Conta autenticada com sucesso" });
 	} catch (error) {

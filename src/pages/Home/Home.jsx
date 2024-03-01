@@ -10,8 +10,6 @@ export const Home = () => {
   return (
       <div>
           <Header aluno={aluno.nome} handleLogout={handleLogout} />
-
-
       </div>
   )
 }

@@ -2,7 +2,7 @@ import { Field, ErrorMessage } from 'formik'
 
 import styles from './style.module.css'
 
-export const TextInput = ({ titulo, placeholder, nome, tipo = "text", children }) => {
+export const TextInput = ({ titulo, placeholder, nome, tipo = "text", max="50", children }) => {
   return (
     <div className={styles["input-group"]}>
       <label htmlFor={nome}>
@@ -15,6 +15,7 @@ export const TextInput = ({ titulo, placeholder, nome, tipo = "text", children }
             id={nome}
             type={tipo}
             placeholder={placeholder}
+            maxLength={max}
           />
           <ErrorMessage
             component="span"

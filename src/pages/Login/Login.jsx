@@ -52,7 +52,7 @@ export const Login = () => {
     <div className={styles.container}>
 
     {mostrandoAlert &&
-      <Alert tipo={dados.tipo} texto={dados.error} />
+      <Alert tipo={dados.tipo} texto={dados.msg || dados.error} />
     }
 
       <Formik 

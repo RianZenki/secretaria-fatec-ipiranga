@@ -26,13 +26,11 @@ export const Header = (props) => {
           <ul>
             <li>
               <NavLink to="/solicitacao" className={styles["link"]} >
-                <FilePlus size={24} color={"#ffffff"} className={styles["icone"]} />
                 Nova Solicitação
               </NavLink>
             </li>
             <li>
               <NavLink to="/home" className={styles["link"]} >
-                <Files size={24} color={"#ffffff"} />
                 Minhas solicitações
               </NavLink>
             </li>

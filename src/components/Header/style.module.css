@@ -1,6 +1,6 @@
 .header {
   width: 100%;
-  background-color: #3498db;
+  background-color: #0582ca;
 
   display: flex;
   justify-content: space-between;
@@ -18,7 +18,7 @@
 .items-container nav ul {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 40px;
 }
 
 .items-container nav ul li {
@@ -32,7 +32,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 18px 0px;
+  padding: 24px 0px;
   color: #fff;
   text-decoration: none;
 }
@@ -62,9 +62,9 @@
   display: flex;
 
   position: absolute;
-  top: 60px;
+  top: 64px;
   width: 200px;
-  background-color: #3498db;
+  background-color: #0582ca;
   right: 0px;
   border-radius: 4px;
   z-index: 1;
@@ -74,7 +74,7 @@
   content: "";
   width: 20px;
   height: 20px;
-  background-color: #3498db;
+  background-color: #0582ca;
   position: absolute;
   border-radius: 4px;
   top: -5px;
@@ -99,7 +99,7 @@
 }
 
 .dropdown-container ul li:hover {
-  background-color: #248bd0;
+  background-color: #3498db;
 }
 
 .dropdown-link {
