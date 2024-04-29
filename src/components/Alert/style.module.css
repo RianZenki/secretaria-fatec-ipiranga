@@ -29,8 +29,7 @@
   height: 5px;
   background-color: #fd9999;
   border-radius: 0 0 0 4px;
-  animation-name: diminuirBarra;
-  animation-duration: 3s;
+  animation: diminuirBarra linear 3s;
 }
 
 @keyframes diminuirBarra {

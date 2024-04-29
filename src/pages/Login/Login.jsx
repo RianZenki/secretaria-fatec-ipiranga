@@ -56,7 +56,11 @@ export const Login = () => {
     <div className={`${styles.container} bg-cyan-700`}>
       {mostrandoAlert && <Alert tipo={dados.tipo} texto={dados.error} />}
 
-      <Formik
+    {mostrandoAlert &&
+      <Alert tipo={dados.tipo} texto={dados.msg || dados.error} />
+    }
+
+      <Formik 
         initialValues={{
           email: "",
           senha: "",
