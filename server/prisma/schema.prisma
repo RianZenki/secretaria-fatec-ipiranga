@@ -35,6 +35,7 @@ model Solicitacao {
   criado_em     DateTime    @default(now())
   atualizado_em DateTime    @default(now())
   encerrado_em  DateTime?
+  encerrado_por String?
   alunoId       String
   Arquivo       Arquivo[]
   Resposta      Resposta[]
@@ -88,7 +89,8 @@ model Secretario {
   email                  String                   @unique
   senha                  String
   token                  String                   @unique
-  cargo                  Cargo                    @default(SECRETARIO) // secretario || secretario geral
+  ativo                  Boolean                  @default(true)
+  cargo                  Cargo
   tipo_pedido_secretario Tipo_pedido_secretario[]
   Resposta               Resposta[]
 

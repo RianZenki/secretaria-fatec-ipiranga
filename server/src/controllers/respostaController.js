@@ -26,7 +26,7 @@ export async function novaResposta(req, res) {
 
 		return res
 			.status(200)
-			.send({ msg: "Resposta criada com sucesso", resposta });
+			.send({ msg: "Resposta enviada com sucesso", resposta });
 	} catch (error) {
 		if (error)
 		return res

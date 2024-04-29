@@ -7,6 +7,8 @@ export const Home = () => {
 
   const { aluno, handleLogout } = useAuth()
 
+  console.log({aluno})
+
   return (
       <div>
           <Header aluno={aluno.nome} handleLogout={handleLogout} />

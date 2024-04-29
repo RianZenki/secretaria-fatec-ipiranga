@@ -96,7 +96,7 @@ export async function login(req, res) {
 		// Verifica se a senha informada está correta
 		if (senhasIguais) {
 			const dadosAlunoLogin = {
-				id: aluno.idAluno,
+				id: aluno.id,
 				email: email,
 				nome: aluno.nome,
 			};
@@ -230,7 +230,7 @@ export async function autenticar(req, res) {
 		if (!alunoAtualizado)
 			return res.status(400).send({ msg: "Erro na autenticação" });
 
-		return res.status(200).redirect("http://localhost:3000/");
+		return res.status(200).redirect("http://localhost:5173/");
 		// return res.status(200).send({ msg: "Conta autenticada com sucesso" });
 	} catch (error) {
 		if (error) return res.status(400).send({ msg: "Erro na autenticação" });

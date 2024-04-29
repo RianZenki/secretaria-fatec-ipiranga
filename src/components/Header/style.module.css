@@ -68,6 +68,7 @@
   right: 0px;
   border-radius: 4px;
   z-index: 1;
+  animation: fadeIn .3s linear;
 }
 
 .dropdown-container::before {
@@ -81,6 +82,17 @@
   right: 40px;
   transform: rotate(50deg);
   z-index: -1;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    top: 50px;
+  }
+  to {
+    opacity: 1;
+    top: 60px;
+  }
 }
 
 .dropdown-container ul {

@@ -1,14 +1,14 @@
 import { prismaClient } from "../database/prismaClient.js";
 
 export async function novaSolicitacao(req, res) {
-	const { descricao, tipo, alunoId } = req.body;
-
+	const { descricao, tipo, alunoId, alunoNome } = req.body;
 	try {
 		const solicitacao = await prismaClient.solicitacao.create({
 			data: {
 				descricao,
 				tipo_pedidoId: +tipo,
 				alunoId,
+				alunoNome
 			},
 		});
 
@@ -44,6 +44,25 @@ export async function listarSolicitacaoPeloId(req, res) {
 			where: {
 				id: solicitacaoId,
 			},
+			include: {
+				Aluno: {
+					select: {
+						nome: true,
+						ra: true,
+						curso: true
+					}
+				},
+				tipo_pedido: {
+					select: {
+						tipo: true
+					}
+				},
+				Resposta: {
+					orderBy: {
+						criado_em: 'asc'
+					}
+				}
+			}
 		});
 
 		return res.status(200).send(solicitacao);
@@ -69,6 +88,9 @@ export async function listarRespostasPeloId(req, res) {
 			where: {
 				solicitacaoId,
 			},
+			orderBy: {
+				criado_em: 'asc'
+			}
 		});
 
 		return res.status(200).send({ respostas });
@@ -82,9 +104,7 @@ export async function listarRespostasPeloId(req, res) {
 
 export async function alterarSolicitacao(req, res) {
 	const { solicitacaoId } = req.params;
-	const { status } = req.body;
-
-	// const dataAtual = new Date().toISOString().slice(0, 10);
+	const { status, secretario } = req.body;
 
 	try {
 		await prismaClient.solicitacao.findFirstOrThrow({
@@ -93,20 +113,40 @@ export async function alterarSolicitacao(req, res) {
 			},
 		});
 
-		const solicitacaoAlterada = await prismaClient.solicitacao.update({
+		const solicitacao = await prismaClient.solicitacao.update({
 			where: {
 				id: solicitacaoId,
+			},
+			include: {
+				Aluno: {
+					select: {
+						nome: true,
+						ra: true,
+						curso: true
+					}
+				},
+				tipo_pedido: {
+					select: {
+						tipo: true
+					}
+				},
+				Resposta: {
+					orderBy: {
+						criado_em: 'asc'
+					}
+				}
 			},
 			data: {
 				status,
 				atualizado_em: new Date(),
 				encerrado_em: status === "finalizado" ? new Date() : null,
+				encerrado_por: status === "finalizado" ? secretario : null
 			},
 		});
 
 		return res.status(200).send({
 			msg: "Solicitação alterada com sucesso",
-			solicitacaoAlterada,
+			solicitacao,
 		});
 	} catch (error) {
 		if (error)

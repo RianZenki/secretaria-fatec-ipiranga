@@ -10,7 +10,7 @@ import {
 
 const router = Router();
 // Consultar dados do aluno
-router.get("/", auth, consultarDados);
+router.get("/:id", auth, consultarDados);
 
 // Alterar dados do aluno
 router.put("/:id", auth, alterarAluno);

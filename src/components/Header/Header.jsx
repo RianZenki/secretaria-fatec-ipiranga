@@ -1,18 +1,17 @@
-import { NavLink } from 'react-router-dom'
-import { useState } from 'react'
-import { FilePlus, Files, UserCircle, CaretDown, User, SignOut } from 'phosphor-react'
+import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { UserCircle, CaretDown, User, SignOut } from "phosphor-react";
 
-import '../../global.css'
-import styles from './style.module.css'
+import "../../global.css";
+import styles from "./style.module.css";
 
-import logo from '../../assets/logo.png'
+import logo from "../../assets/logo.png";
 
 export const Header = (props) => {
-
-  const [visivel, setVisivel] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   function toggleMenu() {
-    setVisivel(!visivel)
+    setIsOpen(!isOpen);
   }
 
   return (
@@ -25,14 +24,12 @@ export const Header = (props) => {
         <nav>
           <ul>
             <li>
-              <NavLink to="/solicitacao" className={styles["link"]} >
-                <FilePlus size={24} color={"#ffffff"} className={styles["icone"]} />
+              <NavLink to="/solicitacao" className={styles["link"]}>
                 Nova Solicitação
               </NavLink>
             </li>
             <li>
-              <NavLink to="/home" className={styles["link"]} >
-                <Files size={24} color={"#ffffff"} />
+              <NavLink to="/home" className={styles["link"]}>
                 Minhas solicitações
               </NavLink>
             </li>
@@ -44,11 +41,11 @@ export const Header = (props) => {
           <p>{props.aluno}</p>
           <CaretDown size={16} weight="bold" color={"#ffffff"} />
 
-          {visivel &&
+          {isOpen && (
             <div className={styles["dropdown-container"]}>
               <ul>
                 <li>
-                  <NavLink to="/perfil" className={styles["dropdown-link"]} >
+                  <NavLink to="/perfil" className={styles["dropdown-link"]}>
                     <User size={20} color={"#ffffff"} />
                     Perfil
                   </NavLink>
@@ -59,9 +56,9 @@ export const Header = (props) => {
                 </li>
               </ul>
             </div>
-          }
+          )}
         </div>
       </div>
     </header>
-  )
-}
+  );
+};

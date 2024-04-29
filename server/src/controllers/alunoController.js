@@ -8,7 +8,7 @@ function exclude(user, keys) {
 }
 
 export async function consultarDados(req, res) {
-	const { id } = req.body;
+	const { id } = req.params;
 
 	try {
 		const aluno = await prismaClient.aluno.findFirst({
@@ -52,7 +52,7 @@ export async function alterarAluno(req, res) {
 			},
 		});
 
-		return res.status(200).send(novosDados);
+		return res.status(200).send({ msg: "Dados atualizado com sucesso!", novosDados});
 	} catch (error) {
 		return res.status(400).send({ error: "Erro na alteração dos dados" });
 	}
@@ -92,12 +92,23 @@ export async function listarSolicitacaoAluno(req, res) {
 		const solicitacoes = await prismaClient.solicitacao.findMany({
 			where: {
 				alunoId
+			},
+			include: {
+				Aluno: {
+					select: {
+						nome: true
+					}
+				}
+			},
+			orderBy: {
+				criado_em: 'desc'
 			}
 		})
 
 		return res.status(200).send(solicitacoes)
 	}
 	catch (error) {
+		console.log(error)
 		if (error)
 			return res.status(400).send({ msg: "Erro ao listar a solicitação", error })
 	}
