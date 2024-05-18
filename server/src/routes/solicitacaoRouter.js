@@ -15,24 +15,8 @@ import {
 
 const router = Router();
 
-router.post("/arquivo", multer(multerConfig).array("file"), (req, res) => {
-	console.log(req.files);
-	console.log(req.body);
-
-	const files = req.files.map((file, index) => {
-		return file.filename;
-	});
-
-	console.log(files);
-
-	// const { tipo, descricao } = req.body
-	// const arquivo = req.file
-
-	res.send("Documento salvo");
-});
-
 // Criar nova solicitação
-router.post("/", auth, novaSolicitacao);
+router.post("/", auth, multer(multerConfig).array("file"), novaSolicitacao);
 
 // Listar todas solicitações
 router.get("/", auth, listarTodasSolicitacoes);

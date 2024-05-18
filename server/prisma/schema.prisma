@@ -48,6 +48,9 @@ model Solicitacao {
 model Arquivo {
   id            String       @id @default(uuid())
   nome          String       @unique
+  tamanho       Int
+  extensao      String
+  url           String
   Solicitacao   Solicitacao? @relation(fields: [solicitacaoId], references: [id])
   solicitacaoId String?
   Resposta      Resposta?    @relation(fields: [respostaId], references: [id])

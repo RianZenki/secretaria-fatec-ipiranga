@@ -2,6 +2,8 @@ import { prismaClient } from "../database/prismaClient.js";
 
 export async function novaSolicitacao(req, res) {
 	const { descricao, tipo, alunoId, alunoNome } = req.body;
+	const filesList = req.files
+
 	try {
 		const solicitacao = await prismaClient.solicitacao.create({
 			data: {
@@ -12,10 +14,25 @@ export async function novaSolicitacao(req, res) {
 			},
 		});
 
+		if (!solicitacao) return res.status(400).send({ msg: "Erro na criação da solicitação" });
+
+		const arquivos = filesList.map(arquivo => ({
+			nome: arquivo.filename,
+			solicitacaoId: solicitacao.id,
+			url: `http://localhost:3001/arquivos/${arquivo.filename}`,
+			tamanho: arquivo.size,
+			extensao: arquivo.filename.split('.').pop()
+		}))
+
+		await prismaClient.arquivo.createMany({
+			data: arquivos
+		})
+
 		return res
 			.status(200)
 			.send({ msg: "Solicitação criada com sucesso!", solicitacao });
 	} catch (error) {
+		console.log(error)
 		if (error)
 			return res
 				.status(400)
@@ -60,6 +77,18 @@ export async function listarSolicitacaoPeloId(req, res) {
 				Resposta: {
 					orderBy: {
 						criado_em: 'asc'
+					},
+					include: {
+						arquivo: true
+					}
+				},
+				Arquivo: {
+					select: {
+						id: true,
+						nome: true,
+						extensao: true,
+						tamanho: true,
+						url: true
 					}
 				}
 			}

@@ -3,7 +3,6 @@ import path from 'path'
 import crypto from 'crypto'
 import * as url from 'url';
 
-const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 export const multerConfig = {
@@ -13,10 +12,11 @@ export const multerConfig = {
       cb(null, path.resolve(__dirname, '..', '..', 'temp', 'uploads'))
     },
     filename: (req, file, cb) => {
-      const hash = crypto.randomBytes(16).toString('hex') + Date.now()
-      const extensao = file.originalname.split('.').pop()
+      const fileName = file.originalname.split('.')
+      const extensao = fileName.pop()
+      const originalName = fileName.join('.')
 
-      const nomeArquivo = `${hash}.${extensao}`
+      const nomeArquivo = `${originalName}_${Date.now()}.${extensao}`
 
       cb(null, nomeArquivo)
     }
@@ -28,6 +28,7 @@ export const multerConfig = {
     const formatosPermitidos = [
       'image/jpeg',
       'image/png',
+      'text/plain',
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
