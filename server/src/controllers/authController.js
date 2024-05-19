@@ -161,46 +161,35 @@ export function verificarTokenSenha(req, res) {
 	);
 }
 
-export function alterarSenha(req, res) {
-	const { id, token } = req.session;
+export async function alterarSenha(req, res) {
+	const { alunoId, senhaAntiga } = req.body
 	const senha = hashSync(req.body.senha);
 
-	console.log(req.session.id);
-	db.query(
-		`SELECT * FROM aluno WHERE idAluno = '${id}' AND token = '${token}'`,
-		(err, result) => {
-			if (err) {
-				// req.session.destroy()
-				res.status(400).send({ error: "Usuário não encontrado" });
+	try {
+		const aluno = await prismaClient.aluno.findFirstOrThrow({
+			where: {
+				id: alunoId,
 			}
+		})
 
-			if (result.length > 0) {
-				db.query(
-					`
-          UPDATE aluno
-          SET senha = '${senha}'
-          WHERE idAluno = '${id} AND token = '${token}'
-        `,
-					(err, result) => {
-						if (err) {
-							// req.session.destroy()
-							return res
-								.status(400)
-								.send({ error: "Erro na alteração da senha" });
-						}
+		const senhasIguais = compareSync(senhaAntiga, aluno.senha);
 
-						// req.session.destroy()
-						return res
-							.status(200)
-							.send({ msg: "Senha alterado com sucesso" });
-					}
-				);
-			} else {
-				// req.session.destroy()
-				return res.status(400).send({ error: "Usuário não encontrado" });
+		if (!senhasIguais)
+			return res.status(400).json({ msg: "Senha inválida" });
+
+		await prismaClient.aluno.update({
+			where: {
+				id: aluno.id
+			},
+			data: {
+				senha
 			}
-		}
-	);
+		})
+
+		return res.status(200).send({ msg: "Senha alterado com sucesso!" })
+	} catch (error) {
+		return res.status(400).send({ msg: "Erro ao alterar a senha!", error });
+	}
 }
 
 export async function autenticar(req, res) {
