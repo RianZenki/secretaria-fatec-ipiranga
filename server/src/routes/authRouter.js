@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-import { cadastro, login, esqueciSenha, verificarTokenSenha, alterarSenha, autenticar } from '../controllers/authController.js'
+import { cadastro, login, esqueciSenha, verificarTokenSenha, alterarSenha, autenticar, novaSenha } from '../controllers/authController.js'
 
 const router = Router()
 // Cadastrar novo aluno
@@ -17,6 +17,8 @@ router.get('/alterar-senha/:id/:token', verificarTokenSenha)
 
 // Alterar senha utilizando um token
 router.post('/alterar-senha', alterarSenha)
+
+router.post('/nova-senha', novaSenha)
 
 // Autenticar conta
 router.get('/autenticar/:token', autenticar)

@@ -2,14 +2,11 @@ import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jsonwebtoken from "jsonwebtoken";
 import { randomBytes } from "crypto";
+const { hashSync, compareSync } = bcrypt;
+const { sign } = jsonwebtoken;
 
 import { prismaClient } from "../database/prismaClient.js";
 import mailer from "../modules/mailer.js";
-
-import db from "../services/connection.js";
-
-const { hashSync, compareSync } = bcrypt;
-const { sign } = jsonwebtoken;
 
 export async function cadastro(req, res) {
 	const { nome, email, curso, turno, ra } = req.body;
@@ -111,54 +108,64 @@ export async function login(req, res) {
 	}
 }
 
-export function esqueciSenha(req, res) {
-	const email = req.body.emailRec;
+export async function esqueciSenha(req, res) {
+	const email = req.body.recoveryEmail;
 
-	db.query(`SELECT * FROM aluno WHERE email = '${email}'`, (err, result) => {
-		if (err) res.status(400).send({ error: "Erro na recuperação de senha" });
+	try {
+		const studant = await prismaClient.aluno.findFirstOrThrow({
+			where: {
+				email
+			}
+		})
 
-		if (result.length > 0) {
-			mailer.sendMail(
-				{
-					from: "Rian Zenki <rian.nacazato@hotmail.com>",
-					to: "rian.zenki@gmail.com",
-					subject: "Recuperar Senha",
-					template: "auth/esqueciSenha",
-					context: { token: result[0].token, id: result[0].idAluno },
-				},
-				(err) => {
-					if (err) {
-						return res.status(400).send({
-							error: "Erro ao enviar o email de recuperação de senha",
-						});
-					}
-
-					return res
-						.status(200)
-						.send({ msg: "Email enviado para a criação da nova senha" });
+		mailer.sendMail(
+			{
+				from: "Rian Zenki <rian.nacazato@hotmail.com>",
+				to: "rian.zenki@gmail.com",
+				subject: "Recuperar Senha",
+				template: "auth/esqueciSenha",
+				context: { token: studant.token, id: studant.id },
+			},
+			(err) => {
+				if (err) {
+					return res.status(400).send({
+						msg: "Erro ao enviar o email de recuperação de senha",
+					});
 				}
-			);
-		} else return res.status(400).send({ error: "Email não encontrado" });
-	});
-}
 
-export function verificarTokenSenha(req, res) {
-	const { id, token } = req.params;
-
-	db.query(
-		`SELECT * FROM aluno WHERE idAluno = '${id}' AND token = '${token}'`,
-		(err, result) => {
-			if (err) return res.status(400).redirect("http://localhost:3000/");
-
-			if (result.length > 0) {
 				return res
 					.status(200)
-					.redirect(`http://localhost:3000/nova-senha?t=${token}`);
-			} else {
-				return res.status(400).redirect("http://localhost:3000/");
+					.send({ msg: "Email de recuperação de senha enviado!" });
 			}
-		}
-	);
+		);
+
+		return res.status(200).send({
+			msg: "Email de recuperação de senha enviado!",
+		});
+	} catch (error) {
+		return res.status(400).send({
+			msg: "Erro ao enviar o email de recuperação de senha",
+		});
+	}
+}
+
+export async function verificarTokenSenha(req, res) {
+	const { id, token } = req.params;
+
+	try {
+		await prismaClient.aluno.findFirstOrThrow({
+			where: {
+				id,
+				token
+			}
+		})
+
+		return res
+					.status(200)
+					.redirect(`http://localhost:5173/nova-senha?t=${token}`);
+	} catch (error) {
+		return res.status(400).redirect("http://localhost:5173/");
+	}
 }
 
 export async function alterarSenha(req, res) {
@@ -180,6 +187,32 @@ export async function alterarSenha(req, res) {
 		await prismaClient.aluno.update({
 			where: {
 				id: aluno.id
+			},
+			data: {
+				senha
+			}
+		})
+
+		return res.status(200).send({ msg: "Senha alterado com sucesso!" })
+	} catch (error) {
+		return res.status(400).send({ msg: "Erro ao alterar a senha!", error });
+	}
+}
+
+export async function novaSenha(req, res) {
+	const { token } = req.body
+	const senha = hashSync(req.body.senha);
+
+	try {
+		const aluno = await prismaClient.aluno.findFirstOrThrow({
+			where: {
+				token
+			}
+		})
+
+		await prismaClient.aluno.update({
+			where: {
+				token: aluno.token
 			},
 			data: {
 				senha
