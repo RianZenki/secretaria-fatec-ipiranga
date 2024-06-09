@@ -21,7 +21,7 @@ router.post("/", auth, novoSecretario);
 router.get("/", auth, listarSomenteSecretarios);
 
 // Listar todos os secrretarios
-router.get("/todos-secretarios", auth, listarTodosSecretarios);
+router.get("/listarSecretarios/:secretarioId", auth, listarTodosSecretarios);
 
 // Listar secretario pelo Id
 router.get("/:secretarioId", auth, listarSecretarioPeloId);

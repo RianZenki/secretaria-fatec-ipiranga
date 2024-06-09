@@ -87,26 +87,25 @@ export async function novoSecretario(req, res) {
 }
 
 export async function listarTodosSecretarios(req, res) {
+	const { secretarioId } = req.params
+
 	try {
 		const secretarios = await prismaClient.secretario.findMany({
+			where: {
+				ativo: true,
+				id: { not: secretarioId }
+			},
 			select: {
 				id: true,
 				numeroMatricula: true,
 				nome: true,
 				email: true,
 				cargo: true,
-				tipo_pedido_secretario: {
-					select: {
-						tipo_pedido: {
-							select: {
-								id: true,
-							},
-						},
-					},
-				},
 			},
+			orderBy: {
+				nome: "asc"
+			}
 		});
-		// console.log(secretarios[0].tipo_pedido_secretario);
 
 		return res.status(200).send(secretarios);
 	} catch (error) {
